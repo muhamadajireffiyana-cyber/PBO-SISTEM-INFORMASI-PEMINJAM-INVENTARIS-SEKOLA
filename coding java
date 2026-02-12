@@ -1,0 +1,204 @@
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Scanner;
+
+// ================= CLASS BARANG =================
+class Barang {
+    String idBarang;
+    String namaBarang;
+    int stok;
+
+    public Barang(String idBarang, String namaBarang, int stok) {
+        this.idBarang = idBarang;
+        this.namaBarang = namaBarang;
+        this.stok = stok;
+    }
+
+    public void tampilBarang() {
+        System.out.println(idBarang + " | " + namaBarang + " | Stok: " + stok);
+    }
+}
+
+// ================= CLASS PEMINJAM =================
+class Peminjam {
+    String idPeminjam;
+    String nama;
+    String kelas;
+
+    public Peminjam(String idPeminjam, String nama, String kelas) {
+        this.idPeminjam = idPeminjam;
+        this.nama = nama;
+        this.kelas = kelas;
+    }
+
+    public void tampilPeminjam() {
+        System.out.println(idPeminjam + " | " + nama + " | " + kelas);
+    }
+}
+
+// ================= CLASS TRANSAKSI =================
+class Transaksi {
+    Barang barang;
+    Peminjam peminjam;
+    Date tanggalPinjam;
+    boolean statusKembali;
+
+    public Transaksi(Barang barang, Peminjam peminjam) {
+        this.barang = barang;
+        this.peminjam = peminjam;
+        this.tanggalPinjam = new Date();
+        this.statusKembali = false;
+    }
+
+    public void kembalikanBarang() {
+        statusKembali = true;
+        barang.stok++;
+        System.out.println("Barang berhasil dikembalikan.");
+    }
+
+    public void tampilTransaksi() {
+        System.out.println("Peminjam: " + peminjam.nama +
+                " | Barang: " + barang.namaBarang +
+                " | Status: " + (statusKembali ? "Sudah Kembali" : "Dipinjam"));
+    }
+}
+
+// ================= MAIN CLASS =================
+public class SistemInventaris {
+
+    static ArrayList<Barang> daftarBarang = new ArrayList<>();
+    static ArrayList<Peminjam> daftarPeminjam = new ArrayList<>();
+    static ArrayList<Transaksi> daftarTransaksi = new ArrayList<>();
+    static Scanner input = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int pilihan;
+
+        do {
+            System.out.println("\n=== SISTEM PEMINJAMAN INVENTARIS SEKOLAH ===");
+            System.out.println("1. Tambah Barang");
+            System.out.println("2. Tambah Peminjam");
+            System.out.println("3. Pinjam Barang");
+            System.out.println("4. Kembalikan Barang");
+            System.out.println("5. Lihat Data");
+            System.out.println("0. Keluar");
+            System.out.print("Pilih menu: ");
+            pilihan = input.nextInt();
+            input.nextLine();
+
+            switch (pilihan) {
+                case 1:
+                    tambahBarang();
+                    break;
+                case 2:
+                    tambahPeminjam();
+                    break;
+                case 3:
+                    pinjamBarang();
+                    break;
+                case 4:
+                    kembalikanBarang();
+                    break;
+                case 5:
+                    lihatData();
+                    break;
+            }
+        } while (pilihan != 0);
+    }
+
+    static void tambahBarang() {
+        System.out.print("ID Barang: ");
+        String id = input.nextLine();
+        System.out.print("Nama Barang: ");
+        String nama = input.nextLine();
+        System.out.print("Stok: ");
+        int stok = input.nextInt();
+        input.nextLine();
+
+        daftarBarang.add(new Barang(id, nama, stok));
+        System.out.println("Barang berhasil ditambahkan.");
+    }
+
+    static void tambahPeminjam() {
+        System.out.print("ID Peminjam: ");
+        String id = input.nextLine();
+        System.out.print("Nama: ");
+        String nama = input.nextLine();
+        System.out.print("Kelas: ");
+        String kelas = input.nextLine();
+
+        daftarPeminjam.add(new Peminjam(id, nama, kelas));
+        System.out.println("Peminjam berhasil ditambahkan.");
+    }
+
+    static void pinjamBarang() {
+        if (daftarBarang.isEmpty() || daftarPeminjam.isEmpty()) {
+            System.out.println("Data barang atau peminjam kosong!");
+            return;
+        }
+
+        System.out.println("Pilih Barang:");
+        for (int i = 0; i < daftarBarang.size(); i++) {
+            System.out.print(i + ". ");
+            daftarBarang.get(i).tampilBarang();
+        }
+        int indexBarang = input.nextInt();
+
+        if (daftarBarang.get(indexBarang).stok <= 0) {
+            System.out.println("Stok habis!");
+            return;
+        }
+
+        System.out.println("Pilih Peminjam:");
+        for (int i = 0; i < daftarPeminjam.size(); i++) {
+            System.out.print(i + ". ");
+            daftarPeminjam.get(i).tampilPeminjam();
+        }
+        int indexPeminjam = input.nextInt();
+        input.nextLine();
+
+        Barang barang = daftarBarang.get(indexBarang);
+        barang.stok--;
+
+        Transaksi transaksi = new Transaksi(barang, daftarPeminjam.get(indexPeminjam));
+        daftarTransaksi.add(transaksi);
+
+        System.out.println("Barang berhasil dipinjam.");
+    }
+
+    static void kembalikanBarang() {
+        if (daftarTransaksi.isEmpty()) {
+            System.out.println("Tidak ada transaksi.");
+            return;
+        }
+
+        System.out.println("Daftar Transaksi:");
+        for (int i = 0; i < daftarTransaksi.size(); i++) {
+            System.out.print(i + ". ");
+            daftarTransaksi.get(i).tampilTransaksi();
+        }
+
+        System.out.print("Pilih transaksi: ");
+        int index = input.nextInt();
+        input.nextLine();
+
+        daftarTransaksi.get(index).kembalikanBarang();
+    }
+
+    static void lihatData() {
+        System.out.println("\n--- DAFTAR BARANG ---");
+        for (Barang b : daftarBarang) {
+            b.tampilBarang();
+        }
+
+        System.out.println("\n--- DAFTAR PEMINJAM ---");
+        for (Peminjam p : daftarPeminjam) {
+            p.tampilPeminjam();
+        }
+
+        System.out.println("\n--- DAFTAR TRANSAKSI ---");
+        for (Transaksi t : daftarTransaksi) {
+            t.tampilTransaksi();
+        }
+    }
+}
